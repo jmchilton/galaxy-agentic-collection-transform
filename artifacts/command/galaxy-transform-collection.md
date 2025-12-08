@@ -330,18 +330,31 @@ All collection operations should be invoked via the Galaxy Tools API (`POST /api
 
 ### Collection Input Format
 ```python
-{
-    "src": "hdca",  # History Dataset Collection Association
-    "id": "collection_id_string"
-}
+# Correct format - requires "values" array wrapper
+{"values": [{"src": "hdca", "id": "collection_id_string"}]}
+
+# INCORRECT (will silently use defaults):
+# {"src": "hdca", "id": "collection_id_string"}
 ```
 
 ### Dataset Input Format
 ```python
-{
-    "src": "hda",  # History Dataset Association
-    "id": "dataset_id_string"
-}
+# Correct format - requires "values" array wrapper
+{"values": [{"src": "hda", "id": "dataset_id_string"}]}
+
+# INCORRECT (will silently use defaults):
+# {"src": "hda", "id": "dataset_id_string"}
+```
+
+### Conditional Parameter Format
+For tools with conditional inputs (like `__FILTER_FROM_FILE__`), use **pipe notation**:
+```python
+# Correct - pipe notation for nested conditionals
+"how|how_filter": "remove_if_absent",
+"how|filter_source": {"values": [{"src": "hda", "id": "file_id"}]}
+
+# INCORRECT (will silently use defaults):
+# "how": {"how_filter": "...", "filter_source": {...}}
 ```
 
 ### Example: Filter Collection
@@ -350,20 +363,19 @@ payload = {
     "tool_id": "__FILTER_FROM_FILE__",
     "history_id": history_id,
     "inputs": {
-        "input": {
-            "src": "hdca",
-            "id": collection_id
-        },
-        "how": {
-            "how_filter": "remove_if_absent",
-            "filter_source": {
-                "src": "hda",
-                "id": identifier_file_id
-            }
-        }
+        # Data inputs require "values" array wrapper
+        "input": {"values": [{"src": "hdca", "id": collection_id}]},
+        # Conditional parameters use pipe notation (not nested objects)
+        "how|how_filter": "remove_if_absent",
+        "how|filter_source": {"values": [{"src": "hda", "id": identifier_file_id}]}
     }
 }
 ```
+
+> **IMPORTANT: API Input Format**
+> - Data inputs (collections, datasets) require `{"values": [{"src": "...", "id": "..."}]}` wrapper
+> - Conditional/nested parameters use **pipe notation**: `"how|filter_source"` not `"how": {"filter_source": ...}`
+> - Incorrect format causes **silent failures** - Galaxy uses defaults instead of erroring
 
 ### Example: Apply Rules
 ```python
@@ -371,10 +383,7 @@ payload = {
     "tool_id": "__APPLY_RULES__",
     "history_id": history_id,
     "inputs": {
-        "input": {
-            "src": "hdca",
-            "id": collection_id
-        },
+        "input": {"values": [{"src": "hdca", "id": collection_id}]},
         "rules": {
             "rules": [
                 {"type": "add_column_metadata", "value": "identifier0"},

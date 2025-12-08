@@ -141,6 +141,13 @@ Claude will use `__FILTER_FROM_FILE__` and `__APPLY_RULES__` tools, upload any n
 
 ## Iteration and Improvement
 
+### Known Issues (Fixed)
+
+**API Payload Format (Dec 2025):** The original documentation had incorrect API input format that caused silent failures. Fixed in [PR #8](https://github.com/jmchilton/galaxy-agentic-collection-transform/pull/8):
+- Data inputs require `{"values": [{"src": "...", "id": "..."}]}` wrapper
+- Conditional parameters require pipe notation: `"how|filter_source"` not nested `"how": {"filter_source": ...}`
+- See [Issue #7](https://github.com/jmchilton/galaxy-agentic-collection-transform/issues/7) for details
+
 ### Current Limitations
 
 - No validation/testing of command effectiveness

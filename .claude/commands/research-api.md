@@ -20,6 +20,12 @@ Focus on:
 - History API: listing, getting contents, looking up by ID
 - Jobs API: checking status, retrieving outputs (especially collection outputs)
 
+IMPORTANT - Galaxy MCP Server (https://github.com/galaxyproject/galaxy-mcp):
+- If Galaxy MCP is available, prefer it over direct API calls
+- MCP tools: `run_tool`, `get_histories`, `list_history_ids`, `get_history_contents`, `get_job_details`, etc.
+- MCP handles input format complexity internally (no need for `values` wrapper)
+- Check for MCP availability before falling back to direct API
+
 IMPORTANT - History ID Usage:
 - Prefer working with history IDs directly when possible
 - If history name/slug lookup is needed: `/api/histories?slug=name` or `?search=partial`

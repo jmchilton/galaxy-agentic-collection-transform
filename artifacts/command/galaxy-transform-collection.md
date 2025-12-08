@@ -86,6 +86,81 @@ inputs = {
 }
 ```
 
+### 6. Debugging with `/api/tools/{id}/build`
+
+When inputs are ignored, use the build endpoint to discover correct format:
+
+```python
+# Get expected input structure for any tool
+GET /api/tools/__FILTER_FROM_FILE__/build?history_id={history_id}
+
+# Response shows exact format expected:
+{
+  "inputs": [
+    {
+      "name": "input",
+      "value": {"values": [{"id": "...", "src": "hdca"}]}  # Note the wrapper!
+    },
+    {
+      "name": "how|filter_source",  # Note pipe notation!
+      "value": {"values": [...]}
+    }
+  ]
+}
+```
+
+### 7. Repeated Parameters Pattern
+
+Tools with repeating sections (like `__BUILD_LIST__`) use indexed notation:
+
+```python
+inputs = {
+    "datasets_0|input": {"src": "hda", "id": dataset1_id},
+    "datasets_1|input": {"src": "hda", "id": dataset2_id},
+    "datasets_2|input": {"src": "hda", "id": dataset3_id}
+}
+```
+
+### 8. Tool Response Structure
+
+Understand what comes back from tool execution:
+
+```python
+response = POST /api/tools { tool_id, history_id, inputs }
+
+# Response contains:
+{
+    "outputs": [...],              # Individual datasets created
+    "output_collections": [...],   # Explicitly created collections
+    "implicit_collections": [...], # Collections from map-over operations
+    "jobs": [...]                  # Job IDs for polling
+}
+```
+
+- Use `outputs` for single dataset results
+- Use `output_collections` for collection tool results
+- Use `implicit_collections` when mapping a tool over a collection
+
+### 9. Inspecting Collections
+
+Before transforming, inspect what you're working with:
+
+```python
+# Get full collection structure
+collection = GET /api/histories/{history_id}/contents/dataset_collections/{collection_id}
+
+# Traverse elements
+for element in collection["elements"]:
+    identifier = element["element_identifier"]  # The name
+    elem_type = element["element_type"]         # "hda" or "dataset_collection"
+
+    if elem_type == "hda":
+        dataset = element["object"]
+        dataset_id = dataset["id"]
+    elif elem_type == "dataset_collection":
+        nested = element["object"]  # Recurse for nested collections
+```
+
 ---
 
 ## Galaxy MCP Server (Preferred When Available)
@@ -506,6 +581,69 @@ def wait_for_job_and_get_output(job_id):
 ```python
 collection = GET /api/histories/{history_id}/contents/dataset_collections/{collection_id}
 # Returns: elements, collection_type, element_count, etc.
+```
+
+### Complete Pipeline Example
+
+End-to-end example: Filter → Sort → Relabel a collection.
+
+```python
+import requests
+import time
+
+GALAXY_URL = "https://usegalaxy.org"
+API_KEY = "your_api_key"
+HEADERS = {"x-api-key": API_KEY}
+
+def run_tool(tool_id, history_id, inputs):
+    """Execute tool and wait for completion."""
+    payload = {"tool_id": tool_id, "history_id": history_id, "inputs": inputs}
+    response = requests.post(f"{GALAXY_URL}/api/tools", json=payload, headers=HEADERS)
+    result = response.json()
+
+    # Wait for all jobs to complete
+    for job in result.get("jobs", []):
+        wait_for_job(job["id"])
+
+    return result
+
+def wait_for_job(job_id):
+    """Poll until terminal state."""
+    while True:
+        job = requests.get(f"{GALAXY_URL}/api/jobs/{job_id}?full=true", headers=HEADERS).json()
+        if job["state"] == "ok":
+            return job
+        elif job["state"] == "error":
+            raise Exception(f"Job failed: {job.get('stderr', '')}")
+        time.sleep(2)
+
+# Pipeline: Filter failed → Sort → Relabel
+history_id = "abc123"
+collection_id = "original_collection"
+relabel_file_id = "mapping_file"
+
+# Step 1: Remove failed datasets
+result1 = run_tool("__FILTER_FAILED_DATASETS__", history_id, {
+    "input": {"src": "hdca", "id": collection_id}
+})
+filtered_id = result1["output_collections"][0]["id"]
+
+# Step 2: Sort alphabetically
+result2 = run_tool("__SORTLIST__", history_id, {
+    "input": {"src": "hdca", "id": filtered_id},
+    "sort_type|sort_type": "alpha"
+})
+sorted_id = result2["output_collections"][0]["id"]
+
+# Step 3: Relabel with mapping file
+result3 = run_tool("__RELABEL_FROM_FILE__", history_id, {
+    "input": {"src": "hdca", "id": sorted_id},
+    "how|how_select": "tabular",
+    "how|labels": {"src": "hda", "id": relabel_file_id}
+})
+final_id = result3["output_collections"][0]["id"]
+
+print(f"Pipeline complete: {final_id}")
 ```
 
 ---

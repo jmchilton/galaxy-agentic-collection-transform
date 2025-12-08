@@ -184,6 +184,17 @@ Claude will use `__FILTER_FROM_FILE__` and `__APPLY_RULES__` tools, upload any n
 4. **Test:** Validate improvements solve the gap
 5. **Document:** Update this README with learnings
 
+> **⚠️ Making Corrections**
+>
+> Never edit generated artifacts directly (`RESEARCH_*.md`, `artifacts/command/*.md`). Fixes will be lost on regeneration.
+>
+> Instead, update the **source command** in `.claude/commands/`:
+> - API format issues → edit `research-api.md`
+> - Tool documentation → edit `research-tools.md`
+> - Final command issues → edit `build-command.md` or the relevant research command
+>
+> Then regenerate: `/research-*` → `/build-command`
+
 **Efficient iteration pattern:**
 ```bash
 # Research specific gap

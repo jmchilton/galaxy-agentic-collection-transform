@@ -56,6 +56,12 @@ Generated via custom `/research-*` slash commands to systematically document Gal
    - Complete examples from `lib/galaxy/util/rules_dsl_spec.yml`
    - 5 composition patterns, best practices, common pitfalls
 
+6. **[RESEARCH_UPLOAD.md](RESEARCH_UPLOAD.md)** - Modern data fetch/upload API
+   - FetchTools.fetch_json API (preferred over legacy upload1)
+   - Uploading identifier files, pasted content, URLs
+   - Request payload structure from test populators
+   - Integration with collection operations
+
 ## Development Workflow
 
 ```
@@ -71,6 +77,8 @@ Generated via custom `/research-*` slash commands to systematically document Gal
 │  /research-tests            →  RESEARCH_TESTS              │
 │       ↓                                                     │
 │  /research-apply-rules      →  RESEARCH_APPLY_RULES        │
+│       ↓                                                     │
+│  /research-upload           →  RESEARCH_UPLOAD             │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
                             ↓

@@ -2,6 +2,8 @@ Research Galaxy Training Network materials on dataset collections and create RES
 
 Read PROBLEM_AND_GOAL.md to understand the context and objectives.
 
+IMPORTANT: Do NOT read previous versions of RESEARCH_SUMMARY_TRAINING.md from artifacts/research/v*/. Generate fresh research from source materials to enable unbiased comparison between research cycles.
+
 Fetch and summarize these Galaxy Training Network tutorials:
 1. https://training.galaxyproject.org/training-material/topics/galaxy-interface/tutorials/collections/tutorial.html
 2. https://training.galaxyproject.org/training-material/topics/galaxy-interface/tutorials/upload-rules/tutorial.html

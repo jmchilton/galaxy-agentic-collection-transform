@@ -2,6 +2,8 @@ Research Galaxy's modern data fetch/upload API and create RESEARCH_UPLOAD.md.
 
 Read PROBLEM_AND_GOAL.md to understand the context and objectives.
 
+IMPORTANT: Do NOT read previous versions of RESEARCH_UPLOAD.md from artifacts/research/v*/. Generate fresh research from source materials to enable unbiased comparison between research cycles.
+
 Accept optional argument: path to Galaxy directory (defaults to ~/workspace/galaxy)
 
 Read and summarize:

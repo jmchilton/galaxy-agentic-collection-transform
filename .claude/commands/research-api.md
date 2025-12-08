@@ -2,6 +2,8 @@ Research Galaxy's tools API and create RESEARCH_API.md.
 
 Read PROBLEM_AND_GOAL.md to understand the context and objectives.
 
+IMPORTANT: Do NOT read previous versions of RESEARCH_API.md from artifacts/research/v*/. Generate fresh research from source materials to enable unbiased comparison between research cycles.
+
 Accept optional argument: path to Galaxy directory (defaults to ~/workspace/galaxy)
 
 Read and summarize:
@@ -41,7 +43,27 @@ IMPORTANT - API Input Format Requirements (from real-world testing):
 - Incorrect format causes SILENT failures - Galaxy uses defaults without error
 - Verify format by checking `/api/tools/{tool_id}/build` endpoint response structure
 
-Output: Create/update artifacts/research/v<N>/RESEARCH_API.md with comprehensive API usage guide.
+IMPORTANT - Map-Over Collection Patterns:
+- Document batch processing with `{"batch": true, "values": [...]}`
+- Linked vs unlinked: `linked: true` processes corresponding elements, `linked: false` produces cartesian product
+- `map_over_type` for nested collections - e.g., map over "paired" within list:paired
+- Show examples for each pattern from test_tools.py
+
+IMPORTANT - Include Complete Pipeline Example:
+- Show multi-step tool chaining: execute tool → extract output collection ID → use as next input
+- Include job polling/waiting between steps
+- Demonstrate proper error checking
+
+IMPORTANT - Tool ID Quick Reference:
+- Include table mapping common operations to tool IDs
+- Categories: filtering, structure transformation, metadata, combination
+- Enables fast lookup without cross-referencing other docs
+
+Output: Create/update artifacts/research/v<N>/RESEARCH_API.md including:
+1. API endpoint documentation with input format requirements
+2. Map-over collection patterns (batch, linked/unlinked, map_over_type)
+3. Complete multi-step pipeline example with job waiting
+4. Tool ID quick reference table
 
 Version detection:
 1. List directories in artifacts/research/ matching v*

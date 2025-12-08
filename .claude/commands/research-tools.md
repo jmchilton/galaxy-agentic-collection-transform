@@ -2,6 +2,8 @@ Research Galaxy's collection operation tools and create RESEARCH_TOOLS.md.
 
 Read PROBLEM_AND_GOAL.md to understand the context and objectives.
 
+IMPORTANT: Do NOT read previous versions of RESEARCH_TOOLS.md from artifacts/research/v*/. Generate fresh research from source materials to enable unbiased comparison between research cycles.
+
 Accept optional argument: path to Galaxy directory (defaults to ~/workspace/galaxy)
 
 Find all XML tool definitions in lib/galaxy/tools (particularly collection operations) and summarize:

@@ -19,44 +19,46 @@ Create a Claude slash command that prefers Galaxy's native collection operation 
 **[artifacts/command/galaxy-transform-collection.md](artifacts/command/galaxy-transform-collection.md)** - Final slash command
 **[artifacts/summary.md](artifacts/summary.md)** - Research reflection and improvement suggestions
 
-### Research Documents (Generation Order)
+### Research Documents (Versioned)
 
-Generated via custom `/research-*` slash commands to systematically document Galaxy's collection capabilities:
+Generated via custom `/research-*` slash commands to systematically document Galaxy's collection capabilities. Research documents are versioned in `artifacts/research/v<N>/` - each research cycle creates a new version.
 
-1. **[RESEARCH_SUMMARY_TRAINING.md](RESEARCH_SUMMARY_TRAINING.md)** - Galaxy Training Network materials
+**Current:** `artifacts/research/v1/`
+
+1. **RESEARCH_SUMMARY_TRAINING.md** - Galaxy Training Network materials
    - Collection fundamentals and types
    - Creation techniques (manual, rule-based, Apply Rules)
    - Workflow integration patterns
    - Best practices for reproducibility
 
-2. **[RESEARCH_TOOLS.md](RESEARCH_TOOLS.md)** - Collection operation tools catalog
+2. **RESEARCH_TOOLS.md** - Collection operation tools catalog
    - 26 tools from `lib/galaxy/tools/*.xml`
    - Organized by category (filtering, structure transformation, building, metadata, advanced)
    - Each tool: location, purpose, inputs, outputs, parameters, use cases, examples
    - Tool selection guide
 
-3. **[RESEARCH_API.md](RESEARCH_API.md)** - Galaxy tools API usage
+3. **RESEARCH_API.md** - Galaxy tools API usage
    - POST /api/tools endpoint and payload structure
    - Collection/dataset input formats
    - 17 tool invocation examples
    - Map-over patterns (batch processing)
    - Best practices for API-based operations
 
-4. **[RESEARCH_TESTS.md](RESEARCH_TESTS.md)** - Test suite patterns
+4. **RESEARCH_TESTS.md** - Test suite patterns
    - Real examples from `lib/galaxy_test/api/test_tools.py`
    - Building collections for testing
    - Map-over patterns (linked/unlinked/nested)
    - 7 Apply Rules examples from actual tests
    - Testing patterns summary
 
-5. **[RESEARCH_APPLY_RULES.md](RESEARCH_APPLY_RULES.md)** - Apply Rules DSL deep dive
+5. **RESEARCH_APPLY_RULES.md** - Apply Rules DSL deep dive
    - Architecture: Collection → Table → Transform → Collection
    - 20 rule operations (9 column addition, 5 filters, 4 structural, 2 other)
    - 4 mapping operations (list_identifiers, paired_identifier, tags, group_tags)
    - Complete examples from `lib/galaxy/util/rules_dsl_spec.yml`
    - 5 composition patterns, best practices, common pitfalls
 
-6. **[RESEARCH_UPLOAD.md](RESEARCH_UPLOAD.md)** - Modern data fetch/upload API
+6. **RESEARCH_UPLOAD.md** - Modern data fetch/upload API
    - FetchTools.fetch_json API (preferred over legacy upload1)
    - Uploading identifier files, pasted content, URLs
    - Request payload structure from test populators
@@ -67,18 +69,21 @@ Generated via custom `/research-*` slash commands to systematically document Gal
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     RESEARCH PHASE                          │
+│                 (outputs to artifacts/research/v<N>/)       │
 │                                                             │
-│  /research-training          →  RESEARCH_SUMMARY_TRAINING  │
+│  /research-training     →  RESEARCH_SUMMARY_TRAINING.md    │
 │       ↓                                                     │
-│  /research-tools            →  RESEARCH_TOOLS              │
+│  /research-tools        →  RESEARCH_TOOLS.md               │
 │       ↓                                                     │
-│  /research-api              →  RESEARCH_API                │
+│  /research-api          →  RESEARCH_API.md                 │
 │       ↓                                                     │
-│  /research-tests            →  RESEARCH_TESTS              │
+│  /research-tests        →  RESEARCH_TESTS.md               │
 │       ↓                                                     │
-│  /research-apply-rules      →  RESEARCH_APPLY_RULES        │
+│  /research-apply-rules  →  RESEARCH_APPLY_RULES.md         │
 │       ↓                                                     │
-│  /research-upload           →  RESEARCH_UPLOAD             │
+│  /research-upload       →  RESEARCH_UPLOAD.md              │
+│                                                             │
+│  Version auto-increments when starting new research cycle   │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
                             ↓
@@ -86,7 +91,7 @@ Generated via custom `/research-*` slash commands to systematically document Gal
 │                  COMMAND GENERATION                         │
 │                                                             │
 │  /build-command                                             │
-│    • Reads all RESEARCH_* docs (~60k tokens)                │
+│    • Reads artifacts/research/<latest>/RESEARCH_* docs     │
 │    • Applies requirements                                   │
 │    • Generates galaxy-transform-collection.md               │
 │    • Creates summary.md with reflections                    │
@@ -194,7 +199,7 @@ Claude will use `__FILTER_FROM_FILE__` and `__APPLY_RULES__` tools, upload any n
 
 > **⚠️ Making Corrections**
 >
-> Never edit generated artifacts directly (`RESEARCH_*.md`, `artifacts/command/*.md`). Fixes will be lost on regeneration.
+> Never edit generated artifacts directly (`artifacts/research/v*/RESEARCH_*.md`, `artifacts/command/*.md`). Fixes will be lost on regeneration.
 >
 > Instead, update the **source command** in `.claude/commands/`:
 > - API format issues → edit `research-api.md`

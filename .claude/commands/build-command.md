@@ -1,6 +1,8 @@
 You should "think hard" about this command.
 
-Read PROBLEM_AND_GOAL.md to understand the problem and then ingest the research we've done with RESEARCH_* documents to understand the research you've already done to address the problem.
+Read PROBLEM_AND_GOAL.md to understand the problem and then ingest the research from artifacts/research/<latest_version>/RESEARCH_* documents to understand the research you've already done to address the problem.
+
+(Find latest version by listing artifacts/research/v* directories and selecting highest number)
 
 Create a slash command called galaxy-transform-collection.md in artifacts/command/ that implements the goal. The generated command should be self contained and not depend on access to Galaxy or the contents of this repository.
 

@@ -1,305 +1,126 @@
-# Build Command Summary: galaxy-transform-collection
-
-## Overview
-
-Created a comprehensive Claude slash command (`galaxy-transform-collection.md`) that teaches Claude to transform Galaxy dataset collections reproducibly using Galaxy's native tools.
+# Summary: Galaxy Collection Transformation Command Generation
 
 ## Research Relevance Assessment
 
 ### Most Relevant Research
 
-1. **RESEARCH_APPLY_RULES.md** ⭐⭐⭐⭐⭐
-   - **Why:** Core DSL documentation with 20 rule types, 4 mapping operations, complete examples
-   - **Usage in command:** Comprehensive Apply Rules section with all rule types, parameters, examples
-   - **Impact:** Enables complex transformations, most powerful tool in toolkit
+1. **RESEARCH_APPLY_RULES.md (Critical)**
+   - Essential for the command - provides complete DSL documentation
+   - Rule types, parameters, mapping operations all directly incorporated
+   - Column-based transformation model is the conceptual core of complex transformations
+   - Examples translated directly into command patterns
 
-2. **RESEARCH_TOOLS.md** ⭐⭐⭐⭐⭐
-   - **Why:** Complete catalog of 26 collection operation tools with inputs/outputs/use cases
-   - **Usage in command:** "Galaxy Collection Tools Reference" section maps directly to this
-   - **Impact:** Provides simple tool alternatives before resorting to Apply Rules
+2. **RESEARCH_TOOLS.md (Critical)**
+   - Complete catalog of collection operation tools with tool IDs
+   - Input/output specifications enabled Strategy A (prefer simple tools)
+   - Tool selection guide became the decision framework priority order
+   - Understanding that tools are "model operations" (no storage increase) informs recommendations
 
-3. **RESEARCH_API.md** ⭐⭐⭐⭐
-   - **Why:** Payload structures, tool invocation patterns, collection input formats
-   - **Usage in command:** "API Invocation Patterns" section with concrete examples
-   - **Impact:** Critical for actual implementation, shows how to call tools programmatically
+3. **RESEARCH_API.md (High)**
+   - Input format requirements (`src`/`id`, `batch`, `values` wrapper) directly used
+   - Pipe notation for conditionals is critical gotcha documented
+   - Job polling pattern for async operations included
+   - Galaxy MCP preference noted
 
-4. **PROBLEM_AND_GOAL.md** ⭐⭐⭐⭐
-   - **Why:** Core principle that all operations must use native tools for reproducibility
-   - **Usage in command:** Opening CRITICAL PRINCIPLE, decision framework rationale
-   - **Impact:** Drives entire command philosophy - never manipulate directly
+4. **RESEARCH_TESTS.md (High)**
+   - Real usage patterns validated the research findings
+   - Map-over patterns (`batch: true`, `linked: false`, `map_over_type`) came from tests
+   - Response structure (`outputs`, `output_collections`, `implicit_collections`) clarified
+   - Edge cases and error handling patterns incorporated
 
-5. **RESEARCH_TESTS.md** ⭐⭐⭐
-   - **Why:** Real usage patterns from Galaxy's test suite, demonstrates best practices
-   - **Usage in command:** Informed examples, validated patterns work in practice
-   - **Impact:** Confidence that suggested approaches actually work
+### Moderately Relevant Research
 
-### Least Relevant Research
+5. **RESEARCH_UPLOAD.md (Moderate)**
+   - Upload patterns used for Strategy C (metadata table upload)
+   - Tagged collection creation pattern used for Strategy D
+   - Fetch API preference noted
+   - Less central since command focuses on transformation, not initial upload
 
-6. **RESEARCH_SUMMARY_TRAINING.md** ⭐⭐
-   - **Why:** User-facing training materials, conceptual understanding
-   - **Usage in command:** Referenced in general principles but not detailed implementation
-   - **Impact:** Good background but command focuses on programmatic usage, not UI
-   - **Note:** Would be more relevant for a command helping users navigate Galaxy UI
+6. **RESEARCH_SUMMARY_TRAINING.md (Moderate)**
+   - Conceptual framing (reproducibility emphasis) shaped the core principle
+   - Collection types summary provided background
+   - Rule-based uploader concepts translated to Apply Rules usage
+   - Higher-level than implementation details needed
 
-## Open Questions
+### Gaps in Research
 
-### 1. Metadata Handling Strategy
+1. **No MCP tool-specific documentation** - Assumed `run_tool` exists but didn't have exact signatures
+2. **Limited real-world Apply Rules examples** - Mostly from test data, few production use cases
+3. **No coverage of error recovery** - What to do when transformation fails mid-pipeline
+4. **No discussion of large collection performance** - When do operations become slow?
 
-**Question:** When missing metadata requires creating mirror collections with tags, should Claude:
-- Always warn about reproducibility concerns?
-- Suggest re-running from data import step?
-- Offer to create both metadata file AND tagged collection for redundancy?
+---
 
-**Current approach:** Two-tiered strategy (tabular upload preferred, mirror collection as last resort with warnings)
+## Open Questions That Would Improve the Command
 
-**Improvement needed:** More guidance on when each approach is appropriate, examples of "metadata too complex for tabular" scenarios
+### Technical Questions
 
-### 2. Error Handling and Validation
+1. **What's the practical size limit for Apply Rules?** Thousands? Millions of elements?
 
-**Question:** How should Claude validate transformations succeeded?
-- Check job status programmatically?
-- Verify output collection structure matches expected?
-- Sample check element identifiers?
-- Compare input/output element counts?
+2. **Can Apply Rules be resumed/checkpointed?** If processing 10,000 elements fails at 5,000, what happens?
 
-**Current approach:** Command shows job polling pattern but doesn't mandate validation
+3. **How do group tags interact with workflow extraction?** If a workflow uses `add_column_group_tag_value`, does the tag need to exist at runtime?
 
-**Improvement needed:** Best practices section on validating transformation correctness
+4. **What's the exact behavior of `allow_unmatched: true` with zero matches?** Empty collection? Error?
 
-### 3. Rule Complexity Threshold
+5. **Can multiple targets in one fetch call reference the same source dataset?** For creating mirrored collections efficiently.
 
-**Question:** When should Claude recommend Apply Rules vs. chaining simpler tools?
-- Number of operations (3+ operations → Apply Rules)?
-- Complexity metrics (regex involved → Apply Rules)?
-- User skill level consideration?
-- Performance implications?
+### Usability Questions
 
-**Current approach:** "Tool Selection Priority" lists order but threshold is fuzzy
+6. **What information does Claude typically have about a collection?** Full element list? Just count and type? This affects what strategies are possible.
 
-**Improvement needed:** Decision tree or scoring system for tool selection
+7. **Should the command request collection details before suggesting a strategy?** Or assume Claude already has this context?
 
-### 4. Workflow Extraction Guidance
+8. **How should Claude handle ambiguous transformations?** E.g., "group by sample" when multiple patterns could extract sample ID.
 
-**Question:** Should command teach Claude to:
-- Actively extract workflows after transformations?
-- Explain how to extract workflows manually?
-- Suggest naming conventions for workflows?
-- Include workflow testing patterns?
+---
 
-**Current approach:** Mentions "can be extracted to workflow" but no how-to
+## Suggestions to Improve the Generation Process
 
-**Improvement needed:** Section on workflow extraction as final step
+### Research Phase
 
-### 5. Handling Non-Standard Collection Types
+1. **Include Galaxy documentation links** - The training tutorials had great conceptual framing, but official API docs would help
+2. **Capture more Apply Rules examples from real analyses** - The test suite is limited; actual bioinformatics use cases would be valuable
+3. **Document MCP server capabilities explicitly** - The command references MCP but relies on assumed functionality
+4. **Add performance benchmarks** - Would help Claude recommend appropriate strategies for different collection sizes
 
-**Question:** How should Claude handle:
-- Record collections (not covered in research)?
-- Deeply nested collections (list:list:list)?
-- Mixed type collections?
-- Collections with metadata conflicts?
+### Command Design
 
-**Current approach:** Command focuses on list, paired, list:paired patterns
+5. **Add a "troubleshooting" section** - Common errors and fixes
+6. **Include regex pattern library** - Common bioinformatics identifier patterns (SRA, TCGA, etc.)
+7. **Add validation step** - Before executing, Claude could describe expected output structure for user confirmation
+8. **Version the command** - As Galaxy evolves, the command needs updating
 
-**Improvement needed:** Edge case handling section
+### Integration
 
-### 6. Interactive Rule Building vs. Programmatic
+9. **Test with real Galaxy MCP** - The command assumes MCP availability but wasn't validated against actual MCP tools
+10. **Create companion test cases** - Specific collection transformation scenarios to validate command effectiveness
+11. **Add "undo" guidance** - If a transformation goes wrong, how to recover
 
-**Question:** When should Claude:
-- Suggest using Galaxy UI rule builder first (for complex regex)?
-- Build rules programmatically directly?
-- Show both approaches?
+---
 
-**Current approach:** Command is fully programmatic, ignores UI rule builder
+## Architectural Reflection
 
-**Improvement needed:** Acknowledge interactive tool exists, explain when to use it
+The four-strategy framework (A: Simple Tools → B: Apply Rules → C: Upload Metadata → D: Mirror Collection) emerged naturally from the research. The key insight is that reproducibility has gradations:
 
-## Suggestions for Improvement
-
-### 1. Research Process Improvements
+- **Strategy A/B**: Fully reproducible, workflow-extractable
+- **Strategy C**: Reproducible if metadata file is preserved
+- **Strategy D**: Reproducible only if analysis restarts from new collection
 
-**Add automated testing examples:**
-- How to validate transformed collections
-- Unit test patterns for Apply Rules
-- Integration test examples from test_tools.py
-
-**Include failure mode documentation:**
-- Common rule errors and solutions
-- Collection type mismatch errors
-- Empty result handling
-
-**Add performance benchmarks:**
-- Apply Rules vs. chained tools
-- Large collection optimization patterns
-- When to batch vs. sequential processing
-
-### 2. Command Generation Improvements
-
-**Add command structure:**
-- Version information (track command updates)
-- Examples library (separate from main docs for maintainability)
-- Quick reference section at top
-- Troubleshooting guide
-
-**Improve decision framework:**
-- Flowcharts or decision trees
-- "If this, then that" patterns
-- Common pitfall warnings upfront
-
-**Add context awareness:**
-- How to detect if Galaxy connection exists
-- How to identify available tools/versions
-- How to adapt to different Galaxy instances
-
-**Include testing guidance:**
-- How Claude should test transformations
-- Validation checklist
-- Rollback strategies for failures
-
-### 3. Documentation Gaps to Address
-
-**Missing from research:**
-- Record collection operations (mentioned but not detailed)
-- Collection metadata schema (what's available in sources?)
-- Tag propagation rules (which tools preserve tags?)
-- Quota implications (which operations copy data?)
-- Multi-history operations (can collections span histories?)
-- Permissions and sharing (how do collection permissions work?)
-
-**Would benefit from research:**
-- Real workflow examples using collection operations
-- Performance characteristics of each tool
-- Tool version differences (do APIs change?)
-- Error message catalog (what do failures look like?)
-- Galaxy configuration impact (which tools are optional?)
-
-### 4. Command Delivery Improvements
-
-**Make self-contained:**
-- Embed all necessary reference material
-- No external dependencies (achieved ✓)
-- Include all tool IDs, parameter names, formats
-
-**Add learning progression:**
-- Start with simplest patterns
-- Build up to complex Apply Rules
-- Progressive examples showing evolution
-
-**Include validation:**
-- Self-test examples Claude can run
-- Expected outputs for verification
-- Sanity check patterns
-
-### 5. User Experience Improvements
-
-**Better explanation templates:**
-- More varied response formats (not repetitive)
-- Adjust verbosity based on user expertise
-- Offer both "quick answer" and "detailed explanation"
-
-**Interactive refinement:**
-- Ask clarifying questions earlier
-- Offer alternatives ("Option A: simple but limited, Option B: complex but flexible")
-- Explain tradeoffs explicitly
-
-**Progress communication:**
-- Show what Claude is doing (not just results)
-- Explain why each step is necessary
-- Set expectations for async operations
-
-## Generation Process Assessment
-
-### What Went Well
-
-1. **Comprehensive research base:** Five detailed research documents covered all necessary aspects
-2. **Clear problem definition:** PROBLEM_AND_GOAL.md articulated core principle effectively
-3. **Real examples:** Test suite research provided validated patterns
-4. **Complete DSL specification:** rules_dsl_spec.yml had every rule type with examples
-5. **Structured approach:** /build-command slash command had clear requirements
-
-### What Could Be Improved
-
-1. **Research efficiency:**
-   - Could have used grep/glob more strategically before reading full files
-   - Some research overlap (tools documented in multiple places)
-   - Rules DSL spec file read could have been deferred until needed
-
-2. **Command organization:**
-   - Very long single file (7500+ lines) - might be hard to maintain
-   - Could split into: core reference, examples library, decision framework
-   - Sections could have better cross-references
-
-3. **Examples depth:**
-   - More real-world scenarios needed (current examples somewhat generic)
-   - Edge cases not well covered
-   - Error recovery patterns missing
-
-4. **Testing:**
-   - No way to validate the command actually works
-   - Should have included test cases
-   - No feedback mechanism for improvements
-
-5. **Iteration:**
-   - Single-pass generation (no refinement)
-   - Didn't test command against sample prompts
-   - No validation of completeness
-
-### If Starting Over
-
-1. **Start with problem scenarios:**
-   - Collect 10-20 real user requests first
-   - Ensure research addresses these specifically
-   - Build command to solve actual needs
-
-2. **Prototype earlier:**
-   - Create minimal command first
-   - Test against sample prompts
-   - Iterate based on results
-
-3. **Modular structure:**
-   - Separate reference docs from decision logic
-   - Make examples swappable/extensible
-   - Version control for command evolution
-
-4. **Add metadata:**
-   - Version tracking
-   - Coverage checklist (what's documented?)
-   - Known limitations section
-   - Update/maintenance guidance
-
-5. **Include feedback loop:**
-   - How users report issues
-   - How command gets updated
-   - Testing framework for validation
-
-## Conclusion
-
-The generated command is comprehensive and well-researched, covering:
-- ✅ All 26 collection operation tools
-- ✅ Complete Apply Rules DSL (20 rule types, 4 mappings)
-- ✅ API invocation patterns
-- ✅ Decision framework for tool selection
-- ✅ Metadata handling strategies
-- ✅ Reproducibility principles
-- ✅ Example interactions
-
-Primary strengths:
-- Self-contained (no external dependencies)
-- Complete reference material
-- Clear principles (always use native tools)
-- Concrete examples with code
-
-Primary weaknesses:
-- Very long (maintainability concern)
-- No validation/testing
-- Limited edge case coverage
-- Missing workflow extraction guidance
-- No error handling patterns
-
-The command should enable Claude to handle most collection transformation requests reproducibly, but would benefit from real-world testing, iteration, and refinement based on actual usage patterns.
-
-## Token Usage Note
-
-This build command consumed ~95k tokens in research phase (reading 6 documents) + ~7k tokens generating command = ~102k total. Future iterations could be more efficient by:
-- Using grep to target specific sections before full reads
-- Caching common patterns
-- Progressively loading detail as needed
+This hierarchy aligns with the problem statement's emphasis on avoiding "ephemeral operations" while acknowledging that sometimes metadata gaps force less-than-ideal approaches.
+
+The Apply Rules DSL is remarkably powerful but has a steep learning curve. The command attempts to bridge this by providing template patterns rather than expecting Claude to derive rules from first principles. This is a reasonable approach but means the command needs periodic updates as new patterns emerge.
+
+---
+
+## Metrics
+
+| Metric | Value |
+|--------|-------|
+| Research documents consumed | 6 |
+| Total research lines | ~2,800 |
+| Command length | ~450 lines |
+| Tool IDs documented | 20 |
+| Apply Rules rule types | 15 |
+| Mapping types | 5 |
+| Strategy tiers | 4 |

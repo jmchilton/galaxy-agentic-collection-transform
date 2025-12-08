@@ -8,6 +8,8 @@ First read:
 1. RESEARCH_TOOLS.md - Previously researched tool information
 2. RESEARCH_API.md - Previously researched API information
 
+Use prior research as context - don't re-explain tools, just show test usage patterns.
+
 Then read lib/galaxy_test/api/test_tools.py from Galaxy and summarize:
 - Test examples for collection operations
 - How apply rules are tested and used

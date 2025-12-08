@@ -9,7 +9,7 @@ Read and summarize:
 2. lib/galaxy_test/api/test_tools.py - API test examples
 3. lib/galaxy/webapps/galaxy/api/histories.py - History API (listing, lookup, contents)
 4. lib/galaxy/webapps/galaxy/api/jobs.py - Jobs API (status, outputs)
-5. https://training.galaxyproject.org/training-material/topics/dev/tutorials/bioblend-api/slides-plain.html - BioBlend API tutorial
+5. https://training.galaxyproject.org/training-material/topics/dev/tutorials/bioblend-api/slides-plain.html - BioBlend API tutorial (if high-level slides without code examples, note "conceptual only" and move on)
 
 Focus on:
 - How to invoke tools via the API

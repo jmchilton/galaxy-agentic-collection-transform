@@ -879,6 +879,98 @@ Tags are powerful metadata carriers:
 
 Prefer using tags + Apply Rules over creating multiple collections.
 
+### Collection-level vs Dataset-level Tags
+
+⚠️ **Important distinction:** `__TAG_FROM_FILE__` tags the *datasets inside* a collection, not the collection itself.
+
+**When this matters:** DESeq2 and other tools that use collection-level `name:` tags for factor levels need tags on the collection object, not its elements.
+
+**To tag datasets inside a collection (what `__TAG_FROM_FILE__` does):**
+```python
+# Each element gets its own tag
+collection.elements[0].tags = ["name:treated"]
+collection.elements[1].tags = ["name:control"]
+```
+
+**To tag the collection itself (for DESeq2 factor levels):**
+```python
+# Direct API call required - no tool equivalent
+PUT /api/tags
+{
+    "item_id": "collection_id",
+    "item_class": "HistoryDatasetCollectionAssociation",
+    "item_tags": ["name:condition_name"]
+}
+```
+
+**Reproducibility note:** Collection-level tagging via API is not captured in an extractable workflow. Document this step carefully when used.
+
+---
+
+## Job Completion and Timing
+
+### Upload Jobs
+
+Upload operations run asynchronously. Datasets may not be immediately available after the upload API returns.
+
+**Symptom:** Tool execution fails with "An input dataset is pending"
+
+**Solutions:**
+
+1. **Poll job status (recommended):**
+```python
+def wait_for_dataset(dataset_id, max_wait=60):
+    for _ in range(max_wait):
+        response = requests.get(f"{galaxy_url}/api/datasets/{dataset_id}")
+        state = response.json().get("state")
+        if state == "ok":
+            return True
+        if state == "error":
+            raise Exception("Dataset failed")
+        time.sleep(1)
+    raise TimeoutError("Dataset not ready")
+```
+
+2. **Simple delay (for small files):**
+```python
+# After upload, wait before using the file
+time.sleep(5)  # 5 seconds usually sufficient for small text files
+```
+
+### Tool Jobs
+
+Similarly, tool outputs aren't immediately available:
+```python
+def wait_for_job(job_id, max_wait=300):
+    while True:
+        response = requests.get(f"{galaxy_url}/api/jobs/{job_id}")
+        job = response.json()
+        if job["state"] == "ok":
+            return job
+        if job["state"] == "error":
+            raise Exception(f"Job failed: {job.get('stderr', 'unknown error')}")
+        time.sleep(2)
+```
+
+---
+
+## Operations Requiring Direct API
+
+Some operations lack Galaxy tool equivalents and require direct API calls:
+
+| Operation | API Endpoint | Reproducibility Impact |
+|-----------|--------------|----------------------|
+| Tag collection (not elements) | `PUT /api/tags` | Not in workflow |
+| Rename collection | UI only* | Manual step |
+| Delete collection | `DELETE /api/dataset_collections/{id}` | Not in workflow |
+
+*Collection renaming via API is unreliable; use Galaxy UI.
+
+**When using direct API calls:**
+1. Document the operation in your analysis notes
+2. Consider whether a tool-based alternative exists
+3. Warn users about reproducibility implications
+
 ---
 
 **Remember:** The goal is reproducible science. Every operation should be traceable, reusable, and workflow-compatible. Galaxy's tools make this possible - use them!
